@@ -24,4 +24,4 @@ jobs:
         git remote add azure "https://PAT:${AZURE_DEVOPS_PAT}@dev.azure.com/AakashAZ400PracticeOrganization/_git/ERPSolution"
         
         # Push latest changes
-        git push azure master --force
+        git push azure master --force 
