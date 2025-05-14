@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ProductDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
 // Add MediatR
 builder.Services.AddMediatR(typeof(CreateProductCommandHandler).Assembly);
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
@@ -35,6 +36,12 @@ builder.Services.AddMassTransit(x =>
 });
 
 var app = builder.Build();
+
+app.MapGet("/migrate", async (ProductDbContext db) =>
+{
+    await db.Database.MigrateAsync();
+  
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
