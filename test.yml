@@ -1,0 +1,12 @@
+﻿name: Test Actions Trigger
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "👋 GitHub Actions is working"

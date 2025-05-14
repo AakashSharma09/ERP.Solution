@@ -34,6 +34,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{5EE0F5F1-C5A6-4A2E-BF29-8D1714AF0699}"
 	ProjectSection(SolutionItems) = preProject
 		sync-to-azure.yml = sync-to-azure.yml
+		test.yml = test.yml
 	EndProjectSection
 EndProject
 Global
