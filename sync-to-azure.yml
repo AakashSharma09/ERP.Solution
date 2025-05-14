@@ -3,7 +3,7 @@ name: Sync GitHub to Azure DevOps
 on:
   push:
     branches:
-      - main
+      - master 
 
 jobs:
   sync:
