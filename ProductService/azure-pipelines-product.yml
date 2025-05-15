@@ -84,4 +84,4 @@ stages:
               scriptLocation: 'inlineScript'
               inlineScript: |
                 echo "Triggering EF Migrations via HTTP GET"
-                curl https://erp-productservice.azurewebsites.net/migrate
+                curl https://erp-productservice-aeeqg0cdfcczdfb3.centralindia-01.azurewebsites.net/migrate
