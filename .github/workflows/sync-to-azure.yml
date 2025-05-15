@@ -14,6 +14,8 @@ jobs:
       # Step 1: Check out the latest commit from GitHub
       - name: 📥 Checkout GitHub Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       # Step 2: Configure Git identity (for commit history in Azure DevOps)
       - name: ⚙️ Configure Git
