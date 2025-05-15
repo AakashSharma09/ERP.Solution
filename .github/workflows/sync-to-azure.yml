@@ -25,9 +25,9 @@ jobs:
       - name: 🚀 Push code to Azure Repos
         run: |
           # Add Azure Repos Git remote securely using PAT from secret
-          git remote add azure "https://$(AZURE_DEVOPS_PAT)@dev.azure.com/AakashAZ400PracticeOrganization/_git/ERPSolution"  
+          git remote add azure "https://$PAT:@dev.azure.com/AakashAZ400PracticeOrganization/_git/ERPSolution"  
 
           # Force push to the master (or main) branch in Azure Repos
           git push azure HEAD:refs/heads/master --force                 
         env:
-          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}             
+          PAT=${{ secrets.AZURE_DEVOPS_PAT }}             
