@@ -12,6 +12,7 @@ stages:
 - stage: Build
   jobs:
   - job: Build
+    displayName: 'Build and Publish ProductService'
     pool:
       vmImage: 'windows-latest'
 
@@ -40,22 +41,16 @@ stages:
         command: 'publish'
         publishWebProjects: false
         projects: '**/ProductService.API.csproj'
-        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProductService'
+        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
         zipAfterPublish: true
 
-    - task: PowerShell@2
-      displayName: 'Rename ZIP'
-      inputs:
-        targetType: 'inline'
-        script: Rename-Item "$(Build.ArtifactStagingDirectory)/ProductService.API.zip" "ProductService.zip"
-
+    # No need to rename ZIP unless strictly needed
 
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)/ProductService'
-        artifactName: 'drop'
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'ProductService'
         publishLocation: 'Container'
-
 
 - stage: Deploy
   dependsOn: Build
@@ -71,22 +66,22 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               artifact: 'ProductService'
-              path: '$(System.ArtifactsDirectory)'
+              path: '$(Pipeline.Workspace)/ProductService'
 
           - task: AzureWebApp@1
+            displayName: 'Deploy to Azure Web App'
             inputs:
-              azureSubscription: 'AzureRM-ERP-Prod'
+              azureSubscription: 'AzureRM-ERP-Prod'  # Must be a service connection in Azure DevOps
               appType: 'webApp'
-              appName: 'erp-productservice'
-              package: '$(Pipeline.Workspace)/drop/ProductService.API.zip'
+              appName: 'erp-productservice'  # Name of your Azure Web App
+              package: '$(Pipeline.Workspace)/ProductService/ProductService.API.zip'
 
-          # Optional: Run EF Core migrations via command line
           - task: AzureCLI@2
+            displayName: 'Trigger EF Core Migrations'
             inputs:
               azureSubscription: 'AzureRM-ERP-Prod'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-                echo "Running EF Core migrations on Azure"
-                curl https://productservice.azurewebsites.net/migrate
-              displayName: 'Trigger EF Migrations (if endpoint available)'
+                echo "Triggering EF Migrations via HTTP GET"
+                curl https://erp-productservice.azurewebsites.net/migrate
