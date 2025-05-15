@@ -17,8 +17,8 @@ jobs:
       env:
         AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
       run: |
-        git config --global user.email "ci@github.com"
-        git config --global user.name "GitHub CI Bot"
+        git config --global user.email "akashsharma890@gmail.com"
+        git config --global user.name "AakashSharma09"
 
         # Add Azure DevOps remote with PAT
         git remote add azure "https://PAT:${AZURE_DEVOPS_PAT}@dev.azure.com/AakashAZ400PracticeOrganization/_git/ERPSolution"
