@@ -1,82 +1,82 @@
 ﻿trigger:
   branches:
     include:
-      - master
+      - master   # or 'main'
+
+pool:
+  vmImage: 'windows-latest'
 
 variables:
   buildConfiguration: 'Release'
-  solution: '**/*.sln'
-  productProject: 'ProductService/ProductService.csproj'
+  serviceName: 'ProductService'
+  outputDir: '$(Build.ArtifactStagingDirectory)/$(serviceName)'
 
 stages:
 - stage: Build
+  displayName: 'Build & Publish ProductService'
   jobs:
   - job: Build
-    pool:
-      vmImage: 'windows-latest'
-
+    displayName: 'Build Job'
     steps:
     - task: UseDotNet@2
       inputs:
         packageType: 'sdk'
-        version: '8.x'
+        version: '7.0.x'
         installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - task: NuGetToolInstaller@1
 
     - task: NuGetCommand@2
       inputs:
-        restoreSolution: '$(solution)'
+        restoreSolution: '**/*.sln'
 
     - task: DotNetCoreCLI@2
+      displayName: 'Build Project'
       inputs:
         command: 'build'
-        projects: '$(productProject)'
+        projects: '**/$(serviceName).csproj'
         arguments: '--configuration $(buildConfiguration)'
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish ProductService.API'  
+      displayName: 'Run EF Core Migrations'
+      inputs:
+        command: 'custom'
+        custom: 'ef'
+        arguments: 'database update --project $(serviceName)/$(serviceName).csproj --startup-project $(serviceName)/$(serviceName).csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Project'
       inputs:
         command: 'publish'
         publishWebProjects: false
-        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProductService.API'
+        projects: '**/$(serviceName).csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
         zipAfterPublish: true
 
     - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)/ProductService.API'
-        artifactName: 'ProductService.API'
+        pathToPublish: '$(outputDir)'
+        artifactName: 'drop'
+        publishLocation: 'Container'
 
 - stage: Deploy
+  displayName: 'Deploy to Azure App Service'
   dependsOn: Build
   jobs:
   - deployment: DeployWeb
-    environment: 'productservice-env'
-    pool:
-      vmImage: 'windows-latest'
+    environment: 'erp-productservice-env'   # Optional: Can set environment in Azure DevOps
     strategy:
       runOnce:
         deploy:
           steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'drop'
-              path: '$(System.ArtifactsDirectory)'
+          - download: current
+            artifact: drop
 
           - task: AzureWebApp@1
+            displayName: 'Deploy ProductService to Azure App Service'
             inputs:
-              azureSubscription: 'AzureRM-ERP-Prod'
+              azureSubscription: 'AzureRM-ERP-Prod'  # Replace with your service connection name
               appType: 'webApp'
-              appName: 'erp-productservice'
-              package: '$(Pipeline.Workspace)/drop/ProductService.API.zip' 
-
-          # Optional: Run EF Core migrations via command line
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'AzureRM-ERP-Prod'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Running EF Core migrations on Azure"
-                curl https://productservice.azurewebsites.net/migrate
-              displayName: 'Trigger EF Migrations (if endpoint available)'
+              appName: 'erp-productservice'                # App Service name in Azure
+              package: '$(Pipeline.Workspace)/drop/$(serviceName).zip'
