@@ -14,6 +14,8 @@ jobs:
       # Step 1: Check out the latest commit from GitHub
       - name: 📥 Checkout GitHub Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       # Step 2: Configure Git identity (for commit history in Azure DevOps)
       - name: ⚙️ Configure Git
@@ -23,11 +25,11 @@ jobs:
 
       # Step 3: Add Azure Repos as a remote and push
       - name: 🚀 Push code to Azure Repos
+        env:
+          PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
         run: |
           # Add Azure Repos Git remote securely using PAT from secret
-          git remote add azure "https://$PAT:@dev.azure.com/AakashAZ400PracticeOrganization/_git/ERPSolution"  
+          git remote add azure https://$PAT:@dev.azure.com/AakashAZ400PracticeOrganization/_git/ERPSolution
 
-          # Force push to the master (or main) branch in Azure Repos
-          git push azure HEAD:refs/heads/master --force                 
-        env:
-          PAT=${{ secrets.AZURE_DEVOPS_PAT }}             
+          # Force push to the master branch in Azure Repos
+          git push azure HEAD:refs/heads/master --force            
