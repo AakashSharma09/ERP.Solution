@@ -39,13 +39,21 @@ stages:
       inputs:
         command: 'publish'
         publishWebProjects: false
+        projects: '**/ProductService.API.csproj'
         arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProductService'
         zipAfterPublish: true
+
+    - task: PowerShell@2
+      displayName: 'Rename ZIP'
+      inputs:
+        targetType: 'inline'
+        script: Rename-Item "$(Build.ArtifactStagingDirectory)/ProductService.API.zip" "ProductService.zip"
+
 
     - task: PublishBuildArtifacts@1
       inputs:
         pathToPublish: '$(Build.ArtifactStagingDirectory)/ProductService'
-        artifactName: 'ProductService'
+        artifactName: 'drop'
         publishLocation: 'Container'
 
 
@@ -70,7 +78,7 @@ stages:
               azureSubscription: 'AzureRM-ERP-Prod'
               appType: 'webApp'
               appName: 'erp-productservice'
-              package: '$(Pipeline.Workspace)/drop/ProductService.zip' 
+              package: '$(Pipeline.Workspace)/drop/ProductService.API.zip'
 
           # Optional: Run EF Core migrations via command line
           - task: AzureCLI@2
