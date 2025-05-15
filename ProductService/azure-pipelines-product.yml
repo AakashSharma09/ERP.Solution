@@ -35,14 +35,17 @@ stages:
         arguments: '--configuration $(buildConfiguration)'
 
     - task: DotNetCoreCLI@2
+      displayName: 'Publish ProductService.API'  
       inputs:
         command: 'publish'
-        publishWebProjects: true
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+        publishWebProjects: false
+        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProductService.API'
         zipAfterPublish: true
 
-    - publish: '$(Build.ArtifactStagingDirectory)'
-      artifact: drop
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)/ProductService.API'
+        artifactName: 'ProductService.API'
 
 - stage: Deploy
   dependsOn: Build
@@ -65,7 +68,7 @@ stages:
               azureSubscription: 'AzureRM-ERP-Prod'
               appType: 'webApp'
               appName: 'erp-productservice'
-              package: '$(System.ArtifactsDirectory)/**/*.zip'
+              package: '$(Pipeline.Workspace)/drop/ProductService.API.zip' 
 
           # Optional: Run EF Core migrations via command line
           - task: AzureCLI@2
