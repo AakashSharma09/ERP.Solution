@@ -62,7 +62,7 @@ stages:
 
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: '<Your-Service-Connection-Name>'
+              azureSubscription: 'AzureRM-ERP-Prod'
               appType: 'webApp'
               appName: 'productservice'
               package: '$(System.ArtifactsDirectory)/**/*.zip'
@@ -70,7 +70,7 @@ stages:
           # Optional: Run EF Core migrations via command line
           - task: AzureCLI@2
             inputs:
-              azureSubscription: '<Your-Service-Connection-Name>'
+              azureSubscription: 'AzureRM-ERP-Prod'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
