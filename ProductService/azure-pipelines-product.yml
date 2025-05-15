@@ -14,7 +14,7 @@ stages:
   - job: Build
     displayName: 'Build and Publish ProductService'
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-22.04'
 
     steps:
     - task: UseDotNet@2
