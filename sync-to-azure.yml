@@ -1,27 +1,33 @@
-name: Sync GitHub to Azure DevOps
+﻿name:  Sync GitHub to Azure DevOps Repo
 
+# Trigger the workflow on every push to the default branch
 on:
   push:
     branches:
-      - master 
+      - master  
 
 jobs:
-  sync:
+  sync-to-azure:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout GitHub repo
-      uses: actions/checkout@v3
+      # Step 1: Check out the latest commit from GitHub
+      - name: 📥 Checkout GitHub Repository
+        uses: actions/checkout@v3
 
-    - name: Push to Azure DevOps Repo
-      env:
-        AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
-      run: |
-        git config --global user.email "akashsharma890@gmail.com"
-        git config --global user.name "AakashSharma09"
+      # Step 2: Configure Git identity (for commit history in Azure DevOps)
+      - name: ⚙️ Configure Git
+        run: |
+          git config --global user.email "akashsharma890@gmail.com"       
+          git config --global user.name "AakashSharma09"                
 
-        # Add Azure DevOps remote with PAT
-        git remote add azure "https://PAT:${AZURE_DEVOPS_PAT}@dev.azure.com/AakashAZ400PracticeOrganization/_git/ERPSolution"
-        
-        # Push latest changes
-        git push azure master --force
+      # Step 3: Add Azure Repos as a remote and push
+      - name: 🚀 Push code to Azure Repos
+        run: |
+          # Add Azure Repos Git remote securely using PAT from secret
+          git remote add azure "https://$(AZURE_DEVOPS_PAT)@dev.azure.com/AakashAZ400PracticeOrganization/_git/ERPSolution"  
+
+          # Force push to the master (or main) branch in Azure Repos
+          git push azure HEAD:refs/heads/master --force                 
+        env:
+          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}             
